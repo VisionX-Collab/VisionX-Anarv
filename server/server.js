@@ -1,36 +1,34 @@
 const express = require('express');
 const path = require('path');
-const app = express();
-const PORT = 5100; // Adjust the port if needed
-
 const connectDB = require('./config/database');
+require('dotenv').config();
+
+const app = express();
+const PORT = process.env.PORT || 5100;
+
+// Connect MongoDB before starting the server
 connectDB();
 
-const githubRoutes = require('./routes/github');
-app.use('/api/github', githubRoutes);
-
-const userRoutes = require('./routes/user');
-app.use('/api/user', userRoutes);
-
-// Middleware to parse JSON
+// Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve static files from the React app
+// Routes
+const githubRoutes = require('./routes/github');
+const userRoutes = require('./routes/user');
+const projectRoutes = require('./routes/projects');
+
+app.use('/api/github', githubRoutes);
+app.use('/api/user', userRoutes);
+app.use('/api/projects', projectRoutes);
+
+// Serve React App
 app.use(express.static(path.join(__dirname, '../client/build')));
-
-// Example API route (optional)
-app.get('/api', (req, res) => {
-    res.json({ message: 'Welcome to VisionX API!' });
-});
-
-
-// Serve the React app for all other routes
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, '../client/build/index.html'));
 });
 
-// Start the server
+// Start Server
 app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+    console.log(`🚀 Server running at http://localhost:${PORT}`);
 });
